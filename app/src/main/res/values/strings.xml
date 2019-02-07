@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">NEWS FEEDS APP</string>
+    <string name="link_development">LINK DEVELOPMENT</string>
+    <string name="search">Search</string>
+    <string name="error_communicating_with_server">An error has occurred</string>
+    <string name="error_network">No internet connection</string>
+    <string name="open_website">OPEN WEBSITE</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="navigation_drawer_open">drawer_open</string>
+    <string name="navigation_drawer_close">drawer_close</string>
+</resources>
