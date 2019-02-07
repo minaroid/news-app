@@ -2,7 +2,11 @@ package com.mina.george.newsfeed.ui.homeactivity;
 
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.material.navigation.NavigationView;
 import com.mina.george.newsfeed.NewsApplication;
 import com.mina.george.newsfeed.R;
 import com.mina.george.newsfeed.adapters.PostsAdapter;
@@ -22,6 +26,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 
 public class HomeActivity extends BaseActivity {
@@ -34,6 +39,12 @@ public class HomeActivity extends BaseActivity {
     DrawerLayout drawerLayout;
     @BindView(R.id.container_host)
     CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.swipeLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.navigationView)
+    NavigationView navigationView;
+    @BindView(R.id.progress)
+    ProgressBar progressBar;
 
     @Inject
     HomeViewModelFactory homeViewModelFactory;
@@ -52,6 +63,8 @@ public class HomeActivity extends BaseActivity {
         homeViewModel.getArticlesLiveData().observe(this, this::bindUI);
         homeViewModel.getErrorLiveData().observe(this, this::ProcessError);
         homeViewModel.fetchNews();
+        progressBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setOnRefreshListener(homeViewModel::fetchNews);
     }
 
     @Override
@@ -68,13 +81,22 @@ public class HomeActivity extends BaseActivity {
         postsRecycler.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
         postsRecycler.setAdapter(postsAdapter);
         postsAdapter.setMoreListener(this::loadMoreNews);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+            return true;
+        });
     }
 
     private void ProcessError(String msg) {
-        showErrorSnackbar(coordinatorLayout, msg);
+        progressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
+        if (msg != null)
+            showErrorSnackbar(coordinatorLayout, msg);
     }
 
     private void bindUI(List<ArticleModel> articleModels) {
+        progressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
         if (isLoadMoreState) {
             postsAdapter.appendList(articleModels);
         } else {
